@@ -44,12 +44,6 @@ Whether you're a casual player or a full-on cat collector, this tool helps you k
 
 ---
 
-## 📸 Preview
-
-(Add screenshots of your project here)
-
----
-
 ## 🎯 Future Improvements
 
 * 🔍 Search or filter cats
