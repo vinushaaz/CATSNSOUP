@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cats & Soup — Collection Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --plum:        #2d1b4e;
+  --plum-mid:    #3f2470;
+  --violet:      #6c3fc5;
+  --lavender:    #9b72e8;
+  --lilac:       #c4a8f5;
+  --blush:       #f0e8ff;
+  --cream:       #faf7ff;
+  --mint:        #a8e6cf;
+  --mint-dark:   #2e7d5e;
+  --gold:        #f5c842;
+  --coral:       #ff8a80;
+  --white:       #ffffff;
+  --text:        #1a0f2e;
+  --text-muted:  #7a6a99;
+  --border:      #e2d4f8;
+  --radius:      14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+.ticker { background: var(--violet); color: var(--white); font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 7px 0; overflow: hidden; white-space: nowrap; }
+.ticker-inner { display: inline-block; animation: ticker 30s linear infinite; }
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+header { background: var(--plum); padding: 0 2rem; position: sticky; top: 0; z-index: 200; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-bottom: 2px solid var(--plum-mid); }
+.logo { font-family: 'Playfair Display', serif; font-size: 1.45rem; font-weight: 900; color: var(--white); padding: 1rem 0; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+.logo-dot { color: var(--gold); }
+.logo-sub { font-size: 10px; font-weight: 400; font-family: 'DM Sans', sans-serif; color: var(--lilac); letter-spacing: 0.05em; display: block; margin-top: -2px; }
+.header-pills { display: flex; gap: 7px; flex-wrap: wrap; padding: 0.5rem 0; }
+.pill { padding: 4px 13px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+.pill.green  { background: rgba(168,230,207,0.18); color: var(--mint);    border: 1px solid rgba(168,230,207,0.3); }
+.pill.gold   { background: rgba(245,200,66,0.15);  color: var(--gold);    border: 1px solid rgba(245,200,66,0.3); }
+.pill.lilac  { background: rgba(196,168,245,0.15); color: var(--lilac);   border: 1px solid rgba(196,168,245,0.3); }
+.pill.coral  { background: rgba(255,138,128,0.15); color: var(--coral);   border: 1px solid rgba(255,138,128,0.3); }
+
+nav { background: var(--plum-mid); display: flex; padding: 0 2rem; overflow-x: auto; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.nav-tab { padding: 13px 22px; font-size: 13px; font-weight: 600; font-family: 'DM Sans',sans-serif; color: rgba(255,255,255,0.5); border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.15s; letter-spacing: 0.02em; }
+.nav-tab:hover { color: var(--lilac); }
+.nav-tab.active { color: var(--white); border-bottom-color: var(--gold); }
+
+.hero { background: linear-gradient(135deg, var(--plum) 0%, var(--plum-mid) 60%, #5a2d91 100%); padding: 2.5rem 2rem 2rem; position: relative; overflow: hidden; }
+.hero::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; border-radius:50%; background:rgba(108,63,197,0.22); pointer-events:none; }
+.hero::after  { content:''; position:absolute; bottom:-40px; left:22%; width:180px; height:180px; border-radius:50%; background:rgba(245,200,66,0.07); pointer-events:none; }
+.hero-title { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem,4vw,2.1rem); font-weight: 900; color: var(--white); line-height: 1.15; margin-bottom: 1.4rem; position: relative; }
+.hero-title span { color: var(--gold); }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(105px,1fr)); gap: 10px; position: relative; }
+.stat-card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius); padding: 13px 14px; text-align: center; }
+.stat-num { font-family: 'Playfair Display', serif; font-size: 1.9rem; font-weight: 900; color: var(--white); line-height: 1; }
+.stat-num.gold  { color: var(--gold); }
+.stat-num.mint  { color: var(--mint); }
+.stat-num.coral { color: var(--coral); }
+.stat-num.lilac { color: var(--lilac); }
+.stat-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+.progress-wrap { margin-top: 1.2rem; }
+.progress-label { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.progress-bar { background: rgba(255,255,255,0.12); border-radius: 99px; height: 8px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg,var(--gold),var(--lavender)); border-radius: 99px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+
+main { padding: 1.5rem 2rem; max-width: 1100px; margin: 0 auto; }
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.22s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+.controls { display: flex; gap: 8px; margin-bottom: 1.2rem; flex-wrap: wrap; align-items: center; }
+input[type=text], select { padding: 9px 13px; font-size: 13px; font-family: 'DM Sans',sans-serif; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--text); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+input[type=text]:focus, select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(108,63,197,0.1); }
+input[type=text] { flex: 1; min-width: 160px; }
+.btn { padding: 9px 18px; font-size: 13px; font-weight: 600; font-family: 'DM Sans',sans-serif; border-radius: 10px; cursor: pointer; white-space: nowrap; transition: all 0.15s; border: 1.5px solid transparent; }
+.btn-default { background: var(--white); color: var(--text); border-color: var(--border); }
+.btn-default:hover { background: var(--blush); border-color: var(--lilac); }
+.btn-primary { background: var(--violet); color: var(--white); }
+.btn-primary:hover { background: var(--plum-mid); }
+.btn-danger { background: #fff0f0; color: #c0392b; border-color: #f5c6c6; }
+.btn-danger:hover { background: #fde0e0; }
+
+.section-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--plum); margin: 1.4rem 0 8px; padding-bottom: 8px; border-bottom: 2px solid var(--blush); display: flex; align-items: center; gap: 8px; }
+.section-count { font-family: 'DM Sans',sans-serif; font-size: 11px; font-weight: 700; background: var(--blush); color: var(--violet); border-radius: 99px; padding: 2px 9px; }
+
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(215px,1fr)); gap: 7px; }
+.cat-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 11px; border: 1.5px solid var(--border); background: var(--white); transition: all 0.12s; }
+.cat-item:hover { border-color: var(--lilac); box-shadow: 0 2px 10px rgba(108,63,197,0.1); }
+.cat-item.owned { background: linear-gradient(135deg,#f3eeff,#ece4ff); border-color: var(--lilac); }
+.cat-item.hidden { display: none; }
+.checkbox { width: 19px; height: 19px; border-radius: 6px; border: 2px solid var(--border); background: var(--white); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+.cat-item.owned .checkbox { background: var(--violet); border-color: var(--violet); }
+.checkmark { display: none; }
+.cat-item.owned .checkmark { display: block; }
+.cat-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-item.owned .cat-name { color: var(--plum); font-weight: 600; }
+.badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; flex-shrink: 0; }
+.badge.event  { background: #fff8e6; color: #a06000; border: 1px solid #ffe090; }
+.badge.custom { background: #eefff6; color: var(--mint-dark); border: 1px solid var(--mint); }
+.counter { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
+.cnt-btn { width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--white); color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.1s; line-height: 1; }
+.cnt-btn:hover { background: var(--blush); border-color: var(--lilac); color: var(--violet); }
+.cnt-val { font-size: 13px; font-weight: 700; font-family: 'Playfair Display',serif; min-width: 20px; text-align: center; color: var(--text-muted); }
+.cnt-val.has  { color: var(--violet); }
+.cnt-val.many { color: var(--gold); }
+.del-btn { width: 20px; height: 20px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.1s; }
+.del-btn:hover { color: #c0392b; background: #fff0f0; }
+
+.chart-chips { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.chip { padding: 5px 14px; font-size: 12px; font-weight: 600; border: 1.5px solid var(--border); border-radius: 99px; background: var(--white); color: var(--text-muted); cursor: pointer; transition: all 0.12s; }
+.chip.active { background: var(--violet); border-color: var(--violet); color: var(--white); }
+.chip:hover:not(.active) { border-color: var(--lilac); color: var(--violet); }
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+.bar-label { font-size: 12px; font-weight: 500; color: var(--text-muted); width: 185px; flex-shrink: 0; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { flex: 1; background: var(--blush); border-radius: 99px; height: 18px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width 0.45s cubic-bezier(.4,0,.2,1); }
+.bar-fill.zero   { background: var(--border); }
+.bar-fill.single { background: linear-gradient(90deg,var(--lavender),var(--violet)); }
+.bar-fill.many   { background: linear-gradient(90deg,var(--gold),#e8a020); }
+.bar-count { font-size: 13px; font-weight: 700; font-family: 'Playfair Display',serif; color: var(--text); width: 24px; text-align: right; flex-shrink: 0; }
+
+.add-box { background: linear-gradient(135deg,var(--plum),var(--plum-mid)); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.2rem; position: relative; overflow: hidden; }
+.add-box::after { content:'✨'; position:absolute; right:1.5rem; top:50%; transform:translateY(-50%); font-size:2.5rem; opacity:0.15; }
+.add-box h3 { font-family: 'Playfair Display',serif; font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+.add-box p { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 12px; line-height: 1.5; }
+.add-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.add-row input { flex: 1; min-width: 200px; background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); color: var(--white); }
+.add-row input::placeholder { color: rgba(255,255,255,0.38); }
+.add-row input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(245,200,66,0.15); background: rgba(255,255,255,0.16); }
+.no-items { text-align: center; padding: 3rem; font-size: 14px; color: var(--text-muted); font-weight: 500; background: var(--white); border-radius: var(--radius); border: 1.5px dashed var(--border); }
+</style>
+</head>
+<body>
+
+<div class="ticker">
+  <span class="ticker-inner">
+    🐱 CATS &amp; SOUP COLLECTION TRACKER &nbsp;·&nbsp; TRACK YOUR CATS &nbsp;·&nbsp; COUNT DUPLICATES &nbsp;·&nbsp; ADD CUSTOM BREEDS &nbsp;·&nbsp; DATA SAVED OFFLINE &nbsp;·&nbsp; 🐾 ALL 79 CATS INCLUDED &nbsp;·&nbsp;
+    🐱 CATS &amp; SOUP COLLECTION TRACKER &nbsp;·&nbsp; TRACK YOUR CATS &nbsp;·&nbsp; COUNT DUPLICATES &nbsp;·&nbsp; ADD CUSTOM BREEDS &nbsp;·&nbsp; DATA SAVED OFFLINE &nbsp;·&nbsp; 🐾 ALL 79 CATS INCLUDED &nbsp;·&nbsp;
+  </span>
+</div>
+
+<header>
+  <div class="logo">
+    <span>🐾</span>
+    <div>cats<span class="logo-dot">.</span>tracker
+      <span class="logo-sub">Cats &amp; Soup · Collection Log</span>
+    </div>
+  </div>
+  <div class="header-pills">
+    <span class="pill green" id="h-owned">0 / 79 owned</span>
+    <span class="pill gold"  id="h-dupes">0 dupes</span>
+    <span class="pill lilac" id="h-custom">0 custom</span>
+    <span class="pill coral" id="h-missing">79 missing</span>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-tab active" onclick="showPage('checklist',this)">✅ &nbsp;Checklist</button>
+  <button class="nav-tab"        onclick="showPage('chart',this)">📊 &nbsp;Count Chart</button>
+  <button class="nav-tab"        onclick="showPage('custom',this)">✨ &nbsp;Custom Cats</button>
+</nav>
+
+<div class="hero">
+  <div class="hero-title">Your <span>paw-some</span><br>collection tracker.</div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num mint"  id="s-owned">0</div><div class="stat-label">Owned</div></div>
+    <div class="stat-card"><div class="stat-num gold"  id="s-total">79</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-num lilac" id="s-dupes">0</div><div class="stat-label">Dupes</div></div>
+    <div class="stat-card"><div class="stat-num coral" id="s-missing">79</div><div class="stat-label">Missing</div></div>
+    <div class="stat-card"><div class="stat-num"       id="s-pct">0%</div><div class="stat-label">Complete</div></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label"><span>Collection progress</span><span id="prog-label">0 / 79</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  </div>
+</div>
+
+<main>
+  <div id="page-checklist" class="page active">
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search cat name…" oninput="filterCats()">
+      <select id="filter" onchange="filterCats()">
+        <option value="all">All cats</option>
+        <option value="owned">Owned</option>
+        <option value="missing">Missing</option>
+        <option value="permanent">Permanent only</option>
+        <option value="event">Event only</option>
+        <option value="custom">Custom only</option>
+      </select>
+      <button class="btn btn-danger" onclick="resetAll()">Reset all</button>
+    </div>
+    <div id="list"></div>
+  </div>
+
+  <div id="page-chart" class="page">
+    <div class="chart-chips">
+      <button class="chip active" onclick="setChartFilter('all',this)">All cats</button>
+      <button class="chip" onclick="setChartFilter('owned',this)">Owned</button>
+      <button class="chip" onclick="setChartFilter('dupes',this)">Duplicates (2+)</button>
+      <button class="chip" onclick="setChartFilter('missing',this)">Missing</button>
+      <button class="chip" onclick="setChartFilter('permanent',this)">Permanent</button>
+      <button class="chip" onclick="setChartFilter('event',this)">Event</button>
+      <button class="chip" onclick="setChartFilter('custom',this)">Custom</button>
+    </div>
+    <div id="chart-wrap"></div>
+  </div>
+
+  <div id="page-custom" class="page">
+    <div class="add-box">
+      <h3>Add a new or different cat</h3>
+      <p>Spotted a cat in-game that isn't on the standard list? Add it here — it'll show up in the Checklist and Chart tabs too.</p>
+      <div class="add-row">
+        <input type="text" id="custom-input" placeholder="e.g. Midnight Mix, Spring Tabby…" onkeydown="if(event.key==='Enter')addCustom()">
+        <button class="btn btn-primary" onclick="addCustom()">+ Add Cat</button>
+      </div>
+    </div>
+    <div id="custom-list"></div>
+  </div>
+</main>
+
+<script>
+const PERMANENT=["Abyssinian","Abyssinian Mix","American Bobtail","American Curl","American Shorthair","Arabian Mau","Balinese","Bengal","Birman","Bombay","British Shorthair","Burmese","Burmilla","Calico Cat","Chartreux","Cornish Rex","Cow Cat","Devon Rex","Dragon Li","Egyptian Mau","Exotic Shorthair","Foldex","Havana Brown","Himalayan","Japanese Bobtail","Korat","LaPerm","Mackerel Tabby","Maine Coon","Manx","Mekong Bobtail","Milk","Munchkin","Norwegian Forest","Ocicat","Odd-eyed Turkish Van","Orange Tabby","Persian","Pixie-Bob","Ragamuffin","Ragdoll","Russian Blue","Savannah","Selkirk Rex","Siamese","Siberian","Singapura","Smoke Persian","Snow Bengal","Snow Shoe","Somali","Sphynx","Suphalak","Toyger","Turkish Angora","Turkish Van","Tuxedo Cat","White Bengal","York Chocolate"];
+const EVENTS=["Astro Coon","Aurora Persian","Calavera Angora","Cherry Blossom Shorthair","Clover Angora","Cloudy Ragdoll","Dawn Spring Angora","Forsythia Persian","Hollow Shorthair","Midori Ragdoll","Night Sky Shorthair","Ocean Blossom Abyssinian","Powdered Sugar Maine Coon","Purple Shorthair","Rainbow Shorthair","Snowflake Macaron Persian","Sunlight Shorthair","Sunset Tabby","Twilight Angora","Wishing Star Shorthair"];
+
+const KEY='cats_soup_v3';
+function loadState(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch(e){}return{counts:{},custom:[]};}
+function saveState(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+
+let state=loadState(), chartFilter='all';
+
+function allCats(){
+  return[...PERMANENT.map(n=>({name:n,type:'permanent'})),...EVENTS.map(n=>({name:n,type:'event'})),...state.custom.map(n=>({name:n,type:'custom'}))];
+}
+function getCount(n){return state.counts[n]||0;}
+function setCount(n,v){state.counts[n]=Math.max(0,v);saveState();updateStats();}
+
+function updateStats(){
+  const cats=allCats(),total=cats.length;
+  let owned=0,dupes=0,missing=0;
+  cats.forEach(c=>{const n=getCount(c.name);if(n>0)owned++;else missing++;if(n>1)dupes+=n-1;});
+  const pct=total?Math.round(owned/total*100):0;
+  ['s-owned','s-total','s-dupes','s-missing','s-pct'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(id==='s-owned')el.textContent=owned;
+    else if(id==='s-total')el.textContent=total;
+    else if(id==='s-dupes')el.textContent=dupes;
+    else if(id==='s-missing')el.textContent=missing;
+    else el.textContent=pct+'%';
+  });
+  document.getElementById('progress').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=owned+' / '+total;
+  document.getElementById('h-owned').textContent=owned+' / '+total+' owned';
+  document.getElementById('h-dupes').textContent=dupes+' dupes';
+  document.getElementById('h-custom').textContent=state.custom.length+' custom';
+  document.getElementById('h-missing').textContent=missing+' missing';
+}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='chart')renderChart();
+  if(id==='custom')renderCustom();
+}
+
+function sid(n){return'c_'+n.replace(/[^a-zA-Z0-9]/g,'_');}
+function esc(n){return n.replace(/"/g,'&quot;');}
+function esj(n){return n.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function chkSVG(){return`<svg class="checkmark" width="11" height="11" viewBox="0 0 11 11" fill="none"><polyline points="1.5,5.5 4.5,8.5 9.5,2.5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
+
+function catHTML(name,type){
+  const cnt=getCount(name),owned=cnt>0;
+  const badge=type==='event'?'<span class="badge event">event</span>':type==='custom'?'<span class="badge custom">custom</span>':'';
+  const del=type==='custom'?`<button class="del-btn" onclick="deleteCustom('${esj(name)}')" title="Remove">✕</button>`:'';
+  const cc=cnt>1?'many':cnt===1?'has':'';
+  return`<div class="cat-item${owned?' owned':''}" id="${sid(name)}" data-name="${esc(name)}" data-type="${type}">
+    <div class="checkbox" onclick="toggleOwned('${esj(name)}')">${owned?chkSVG():''}</div>
+    <span class="cat-name" title="${esc(name)}">${name}</span>
+    ${badge}
+    <div class="counter">
+      <button class="cnt-btn" onclick="changeCount('${esj(name)}',-1)">−</button>
+      <span class="cnt-val ${cc}" id="cv_${sid(name)}">${cnt}</span>
+      <button class="cnt-btn" onclick="changeCount('${esj(name)}',1)">+</button>
+    </div>${del}
+  </div>`;
+}
+
+function renderChecklist(){
+  let h=`<div class="section-title">Permanent breeds <span class="section-count">${PERMANENT.length}</span></div><div class="cat-grid">`;
+  PERMANENT.forEach(n=>h+=catHTML(n,'permanent'));
+  h+=`</div><div class="section-title">Event-limited <span class="section-count">${EVENTS.length}</span></div><div class="cat-grid">`;
+  EVENTS.forEach(n=>h+=catHTML(n,'event'));
+  h+='</div>';
+  if(state.custom.length){
+    h+=`<div class="section-title">Custom cats <span class="section-count">${state.custom.length}</span></div><div class="cat-grid">`;
+    state.custom.forEach(n=>h+=catHTML(n,'custom'));
+    h+='</div>';
+  }
+  document.getElementById('list').innerHTML=h;
+  filterCats();updateStats();
+}
+
+function refreshItem(name){
+  const el=document.getElementById(sid(name));if(!el)return;
+  const cnt=getCount(name);
+  el.classList.toggle('owned',cnt>0);
+  const cb=el.querySelector('.checkbox');if(cb)cb.innerHTML=cnt>0?chkSVG():'';
+  const cv=document.getElementById('cv_'+sid(name));
+  if(cv){cv.textContent=cnt;cv.className='cnt-val '+(cnt>1?'many':cnt===1?'has':'');}
+}
+
+function toggleOwned(n){setCount(n,getCount(n)>0?0:1);refreshItem(n);}
+function changeCount(n,d){setCount(n,getCount(n)+d);refreshItem(n);}
+
+function filterCats(){
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  const f=document.getElementById('filter').value;
+  document.querySelectorAll('.cat-item').forEach(el=>{
+    const name=el.dataset.name,type=el.dataset.type,cnt=getCount(name);
+    const mQ=name.toLowerCase().includes(q);
+    const mF=f==='all'||(f==='owned'&&cnt>0)||(f==='missing'&&cnt===0)||(f==='permanent'&&type==='permanent')||(f==='event'&&type==='event')||(f==='custom'&&type==='custom');
+    el.classList.toggle('hidden',!mQ||!mF);
+  });
+}
+
+function resetAll(){
+  if(!confirm('Reset all cat counts? This cannot be undone.'))return;
+  state.counts={};saveState();renderChecklist();updateStats();
+}
+
+function setChartFilter(f,btn){
+  chartFilter=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderChart();
+}
+
+function renderChart(){
+  let cats=allCats();
+  if(chartFilter==='owned')cats=cats.filter(c=>getCount(c.name)>0);
+  else if(chartFilter==='dupes')cats=cats.filter(c=>getCount(c.name)>1);
+  else if(chartFilter==='missing')cats=cats.filter(c=>getCount(c.name)===0);
+  else if(chartFilter==='permanent')cats=cats.filter(c=>c.type==='permanent');
+  else if(chartFilter==='event')cats=cats.filter(c=>c.type==='event');
+  else if(chartFilter==='custom')cats=cats.filter(c=>c.type==='custom');
+  cats.sort((a,b)=>getCount(b.name)-getCount(a.name)||a.name.localeCompare(b.name));
+  const wrap=document.getElementById('chart-wrap');
+  if(!cats.length){wrap.innerHTML='<div class="no-items">No cats match this filter.</div>';return;}
+  const max=Math.max(...cats.map(c=>getCount(c.name)),1);
+  let h='';
+  cats.forEach(c=>{
+    const cnt=getCount(c.name),pct=Math.round(cnt/max*100);
+    const cls=cnt===0?'zero':cnt>1?'many':'single';
+    const tb=c.type==='event'?` <span style="font-size:10px;color:#a06000;background:#fff8e6;border-radius:99px;padding:1px 6px;border:1px solid #ffe090;font-weight:700;">event</span>`:c.type==='custom'?` <span style="font-size:10px;color:#2e7d5e;background:#eefff6;border-radius:99px;padding:1px 6px;border:1px solid #a8e6cf;font-weight:700;">custom</span>`:'';
+    h+=`<div class="bar-row"><div class="bar-label" title="${esc(c.name)}">${c.name}${tb}</div><div class="bar-track"><div class="bar-fill ${cls}" style="width:${Math.max(pct,cnt>0?2:0)}%"></div></div><div class="bar-count">${cnt}</div></div>`;
+  });
+  wrap.innerHTML=h;
+}
+
+function addCustom(){
+  const input=document.getElementById('custom-input');
+  const name=input.value.trim();if(!name)return;
+  if(allCats().map(c=>c.name.toLowerCase()).includes(name.toLowerCase())){alert('"'+name+'" already exists!');return;}
+  state.custom.push(name);saveState();input.value='';
+  renderChecklist();renderCustom();updateStats();
+}
+
+function deleteCustom(name){
+  if(!confirm('Remove "'+name+'" from custom cats?'))return;
+  state.custom=state.custom.filter(n=>n!==name);
+  delete state.counts[name];saveState();
+  renderChecklist();renderCustom();updateStats();
+}
+
+function renderCustom(){
+  const el=document.getElementById('custom-list');
+  if(!state.custom.length){el.innerHTML='<div class="no-items">No custom cats yet. Add ones you find in-game above.</div>';return;}
+  let h=`<div class="section-title">Your custom cats <span class="section-count">${state.custom.length}</span></div><div class="cat-grid">`;
+  state.custom.forEach(n=>h+=catHTML(n,'custom'));
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+renderChecklist();updateStats();
+</script>
+</body>
+</html>
