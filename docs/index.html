@@ -276,8 +276,17 @@ input[type=text] { flex: 1; min-width: 160px; }
         <option value="all">All friends</option>
         <option value="met">Met</option>
         <option value="missing">Not yet met</option>
+        <option value="custom">Custom only</option>
       </select>
       <button class="btn btn-danger" onclick="resetFriends()">Reset all</button>
+    </div>
+    <div class="add-box" style="background:linear-gradient(135deg,#1a3a2a,#2e5e42);margin-bottom:1rem;">
+      <h3>Add a custom friend</h3>
+      <p>Found a friend not on the list? Add them here — they'll appear in your tracker with a custom badge.</p>
+      <div class="add-row">
+        <input type="text" id="custom-friend-input" placeholder="e.g. Golden Hamster, Tiny Axolotl…" onkeydown="if(event.key==='Enter')addCustomFriend()">
+        <button class="btn btn-primary" onclick="addCustomFriend()">+ Add Friend</button>
+      </div>
     </div>
     <div id="friends-list"></div>
   </div>
@@ -498,31 +507,36 @@ const FRIENDS_GROUPS = [
 ];
 
 const FRIENDS_KEY = 'cats_soup_friends_v1';
-function loadFriends(){try{const r=localStorage.getItem(FRIENDS_KEY);if(r)return JSON.parse(r);}catch(e){}return{};}
+function loadFriends(){try{const r=localStorage.getItem(FRIENDS_KEY);if(r)return JSON.parse(r);}catch(e){}return{met:{},custom:[]};}
 function saveFriends(){try{localStorage.setItem(FRIENDS_KEY,JSON.stringify(friendState));}catch(e){}}
 
 let friendState = loadFriends();
+// migrate old format (plain object) to new {met, custom}
+if(!friendState.met){friendState={met:friendState,custom:[]};}
 
-function allFriendsCount(){return FRIENDS_GROUPS.reduce((a,g)=>a+g.friends.length,0);}
-function isMet(name){return !!friendState[name];}
+function allFriendsCount(){return FRIENDS_GROUPS.reduce((a,g)=>a+g.friends.length,0)+(friendState.custom||[]).length;}
+function isMet(name){return !!friendState.met[name];}
 function toggleFriend(name){
-  friendState[name] = !friendState[name];
-  if(!friendState[name]) delete friendState[name];
+  friendState.met[name] = !friendState.met[name];
+  if(!friendState.met[name]) delete friendState.met[name];
   saveFriends();
   refreshFriendItem(name);
   updateFriendStats();
 }
-function metCount(){return Object.values(friendState).filter(Boolean).length;}
+function metCount(){return Object.values(friendState.met).filter(Boolean).length;}
 
 function fsid(n){return'f_'+n.replace(/[^a-zA-Z0-9]/g,'_');}
 function fchkSVG(){return`<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><polyline points="1.5,5.5 4.5,8.5 9.5,2.5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
 
-function friendHTML(name){
+function friendHTML(name, isCustom){
   const met=isMet(name);
   const safe=name.replace(/"/g,'&quot;'),safej=name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-  return`<div class="friend-item${met?' met':''}" id="${fsid(name)}" data-name="${safe}" onclick="toggleFriend('${safej}')">
+  const badge=isCustom?`<span class="badge custom" style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:#eefff6;color:#2e7d5e;border:1px solid #a8e6cf;flex-shrink:0;">custom</span>`:'';
+  const del=isCustom?`<button class="del-btn" onclick="event.stopPropagation();deleteCustomFriend('${safej}')" title="Remove">✕</button>`:'';
+  return`<div class="friend-item${met?' met':''}" id="${fsid(name)}" data-name="${safe}" data-custom="${isCustom?'1':'0'}" onclick="toggleFriend('${safej}')">
     <div class="friend-check">${met?fchkSVG():''}</div>
     <span class="friend-name" title="${safe}">${name}</span>
+    ${badge}${del}
   </div>`;
 }
 
@@ -530,11 +544,34 @@ function renderFriends(){
   let h='';
   FRIENDS_GROUPS.forEach(g=>{
     h+=`<div class="friend-group-title">${g.emoji} ${g.label} <span class="section-count" style="background:#d0f0e0;color:#2e7d5e;">${g.friends.length}</span></div><div class="friend-grid">`;
-    g.friends.forEach(n=>h+=friendHTML(n));
+    g.friends.forEach(n=>h+=friendHTML(n,false));
     h+='</div>';
   });
+  if(friendState.custom && friendState.custom.length){
+    h+=`<div class="friend-group-title">✨ Custom Friends <span class="section-count" style="background:#d0f0e0;color:#2e7d5e;">${friendState.custom.length}</span></div><div class="friend-grid">`;
+    friendState.custom.forEach(n=>h+=friendHTML(n,true));
+    h+='</div>';
+  }
   document.getElementById('friends-list').innerHTML=h;
   updateFriendStats();
+}
+
+function addCustomFriend(){
+  const input=document.getElementById('custom-friend-input');
+  const name=input.value.trim(); if(!name)return;
+  const all=[...FRIENDS_GROUPS.flatMap(g=>g.friends),...(friendState.custom||[])];
+  if(all.map(n=>n.toLowerCase()).includes(name.toLowerCase())){alert('"'+name+'" already exists!');return;}
+  if(!friendState.custom) friendState.custom=[];
+  friendState.custom.push(name);
+  saveFriends(); input.value='';
+  renderFriends();
+}
+
+function deleteCustomFriend(name){
+  if(!confirm('Remove "'+name+'" from custom friends?'))return;
+  friendState.custom=friendState.custom.filter(n=>n!==name);
+  delete friendState.met[name];
+  saveFriends(); renderFriends();
 }
 
 function refreshFriendItem(name){
@@ -557,16 +594,16 @@ function filterFriends(){
   const q=(document.getElementById('friends-search').value||'').toLowerCase();
   const f=document.getElementById('friends-filter').value;
   document.querySelectorAll('.friend-item').forEach(el=>{
-    const name=el.dataset.name;
+    const name=el.dataset.name, isCustom=el.dataset.custom==='1';
     const mQ=name.toLowerCase().includes(q);
-    const mF=f==='all'||(f==='met'&&isMet(name))||(f==='missing'&&!isMet(name));
+    const mF=f==='all'||(f==='met'&&isMet(name))||(f==='missing'&&!isMet(name))||(f==='custom'&&isCustom);
     el.classList.toggle('hidden',!mQ||!mF);
   });
 }
 
 function resetFriends(){
   if(!confirm('Reset all friend progress? This cannot be undone.'))return;
-  friendState={};saveFriends();renderFriends();
+  friendState={met:{},custom:[]};saveFriends();renderFriends();
 }
 
 const _origShowPage=showPage;
