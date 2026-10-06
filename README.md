@@ -24,26 +24,6 @@ Whether you're a casual player or a full-on cat collector, this tool helps you k
 
 ---
 
-## 🚀 How to Use
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/your-username/cats-soup-tracker.git
-   ```
-
-2. Open the project folder:
-
-   ```bash
-   cd cats-soup-tracker
-   ```
-
-3. Run the project:
-
-   * Open `index.html` in your browser
-
----
-
 ## 🎯 Future Improvements
 
 * 🔍 Search or filter cats
